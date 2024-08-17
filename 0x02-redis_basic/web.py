@@ -1,33 +1,56 @@
 #!/usr/bin/env python3
-""" Redis Module """
+"""
+a module for fetching web pages with request
+counting and caching using Redis.
+"""
 
-from functools import wraps
-import redis
 import requests
+from functools import wraps
 from typing import Callable
+import redis
 
-redis_client = redis.Redis()
+redis_ = redis.Redis()
 
 
 def count_requests(method: Callable) -> Callable:
-    """ Decorator for counting requests """
+    """
+    decorator to count the number of requests
+    made to a URL and cache the response.
+    Args:
+        method (Callable): The method to be decorated.
+    Returns:
+        Callable: The wrapped method with request counting.
+    """
     @wraps(method)
     def wrapper(url):
-        """ Wrapper function for counting requests """
-        redis_client.incr(f"count:{url}")
-        cached_html = redis_client.get(f"cached:{url}")
+        """
+        wrapper function to increment the request
+        count, check cache, and fetch the page if not cached.
+        Args:
+            url (str): The URL of the page to fetch.
+        Returns:
+            str: The HTML content of the page.
+        """
+        redis_.incr(f"count:{url}")
+        cached_html = redis_.get(f"cached:{url}")
         if cached_html:
             return cached_html.decode('utf-8')
         html = method(url)
-        redis_client.setex(f"cached:{url}", 10, html)
+        redis_.setex(f"cached:{url}", 10, html)
         return html
 
-    return wrapper
+        return wrapper
 
 
 @count_requests
 def get_page(url: str) -> str:
-    """ Obtain the HTML content of a URL """
+    """
+    fetch the HTML content of a page from the specified URL.
+    Args:
+        url (str): The URL of the page to fetch.
+    Returns:
+        str: The HTML content of the page.
+    """
     req = requests.get(url)
     return req.text
 
