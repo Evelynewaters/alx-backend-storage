@@ -1,0 +1,4 @@
+// find all function in collection school
+
+db.school.find()
+
