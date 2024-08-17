@@ -1,0 +1,4 @@
+// find data based on input starting with the user input (regEx)
+
+db.school.find({name: {$regex:'^Holberton.*'}})
+
