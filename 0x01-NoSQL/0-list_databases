@@ -1,0 +1,4 @@
+// create a list of database present in the mongodb
+
+show databases
+
